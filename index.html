@@ -6,7 +6,7 @@
 <title>Prenota il tuo tavolo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=League+Spartan:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=League+Spartan:wght@700;800&family=Great+Vibes&display=swap" rel="stylesheet">
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      FOOD MEDIA LAB · TEMPLATE LANDING PRENOTAZIONI RISTORANTE
@@ -29,6 +29,8 @@ const CONFIG = {
     tagline:  "Cucina piemontese · Torino",  // piccola scritta sopra il titolo
     logo:     "",                     // path immagine logo (es. "logo.png"); se "" usa le iniziali
     iniziali: "AC",                   // fallback mostrato nel cerchio se manca il logo
+    // Logo TESTUALE (wordmark) senza riquadro: ha priorità su logo/iniziali. "" per non usarlo.
+    logoWordmark: '<span class="wm-antica">Antica</span><span class="wm-trattoria">Trattoria</span><span class="wm-cirio">Cirio</span>',
   },
 
   /* ─── 2. COLORI BRAND (default nero / bianco / oro Food Media Lab) ───── */
@@ -211,6 +213,17 @@ body::before{
   font-family:var(--font-display);
   font-size:34px;font-weight:700;color:var(--gold);letter-spacing:1px;
 }
+
+/* ── Logo testuale (wordmark), senza cerchio/riquadro ── */
+.logo-wrap.is-wordmark{
+  width:auto;height:auto;max-width:300px;
+  border-radius:0;background:none;box-shadow:none;overflow:visible;
+  flex-direction:column;gap:0;padding:0;
+}
+.logo-wrap.is-wordmark span{display:block;color:var(--gold);text-align:center}
+.wm-antica{font-family:'Great Vibes',cursive;font-size:clamp(30px,9vw,42px);font-weight:400;line-height:.9;margin-bottom:2px}
+.wm-trattoria{font-family:'League Spartan',sans-serif;font-weight:800;font-size:clamp(24px,7vw,32px);letter-spacing:3px;text-transform:uppercase;line-height:1}
+.wm-cirio{font-family:'League Spartan',sans-serif;font-weight:800;font-size:clamp(42px,13vw,60px);letter-spacing:1px;text-transform:uppercase;line-height:.92}
 .brand-eyebrow{
   font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
   color:var(--gold);margin-bottom:14px;
@@ -903,7 +916,10 @@ h1 em{font-style:italic;color:var(--gold)}
   function popolaContenuti(){
     // Logo
     const logoWrap = document.getElementById('logoWrap');
-    if(C.brand.logo){
+    if(C.brand.logoWordmark){
+      logoWrap.classList.add('is-wordmark');
+      logoWrap.innerHTML = C.brand.logoWordmark;
+    } else if(C.brand.logo){
       logoWrap.innerHTML = '<img src="'+C.brand.logo+'" alt="Logo '+esc(C.brand.nome)+'">';
     } else {
       logoWrap.innerHTML = '<span class="logo-initials">'+esc(C.brand.iniziali)+'</span>';
