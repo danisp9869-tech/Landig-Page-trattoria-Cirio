@@ -6,7 +6,7 @@
 <title>Prenota il tuo tavolo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=League+Spartan:wght@700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=League+Spartan:wght@700;800&display=swap" rel="stylesheet">
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      FOOD MEDIA LAB · TEMPLATE LANDING PRENOTAZIONI RISTORANTE
@@ -27,10 +27,10 @@ const CONFIG = {
   brand: {
     nome:     "Antica Trattoria Cirio",  // nome del ristorante
     tagline:  "Cucina piemontese · Torino",  // piccola scritta sopra il titolo
-    logo:     "",                     // path immagine logo (es. "logo.png"); se "" usa le iniziali
+    logo:     "logo.png",             // path immagine logo (mostrato senza riquadro); se "" usa le iniziali
     iniziali: "AC",                   // fallback mostrato nel cerchio se manca il logo
     // Logo TESTUALE (wordmark) senza riquadro: ha priorità su logo/iniziali. "" per non usarlo.
-    logoWordmark: '<span class="wm-antica">Antica</span><span class="wm-trattoria">Trattoria</span><span class="wm-cirio">Cirio</span>',
+    logoWordmark: '',
   },
 
   /* ─── 2. COLORI BRAND (default nero / bianco / oro Food Media Lab) ───── */
@@ -209,6 +209,12 @@ body::before{
   box-shadow:0 0 0 1px rgba(184,147,58,.2), var(--shadow-md);
 }
 .logo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+/* ── Logo immagine senza cerchio/riquadro (sfondo trasparente) ── */
+.logo-wrap.is-logo-img{
+  width:auto;height:auto;max-width:280px;
+  border-radius:0;background:none;box-shadow:none;overflow:visible;padding:0;
+}
+.logo-wrap.is-logo-img img{width:100%;height:auto;max-height:150px;object-fit:contain}
 .logo-initials{
   font-family:var(--font-display);
   font-size:34px;font-weight:700;color:var(--gold);letter-spacing:1px;
@@ -920,6 +926,7 @@ h1 em{font-style:italic;color:var(--gold)}
       logoWrap.classList.add('is-wordmark');
       logoWrap.innerHTML = C.brand.logoWordmark;
     } else if(C.brand.logo){
+      logoWrap.classList.add('is-logo-img');
       logoWrap.innerHTML = '<img src="'+C.brand.logo+'" alt="Logo '+esc(C.brand.nome)+'">';
     } else {
       logoWrap.innerHTML = '<span class="logo-initials">'+esc(C.brand.iniziali)+'</span>';
