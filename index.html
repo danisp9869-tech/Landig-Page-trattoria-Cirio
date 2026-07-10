@@ -25,10 +25,10 @@ const CONFIG = {
 
   /* ─── 1. BRAND / IDENTITÀ ───────────────────────────────────────────── */
   brand: {
-    nome:     "Trattoria del Borgo",  // nome del ristorante
-    tagline:  "Ristorante · Torino",  // piccola scritta sopra il titolo
+    nome:     "Antica Trattoria Cirio",  // nome del ristorante
+    tagline:  "Cucina piemontese · Torino",  // piccola scritta sopra il titolo
     logo:     "",                     // path immagine logo (es. "logo.png"); se "" usa le iniziali
-    iniziali: "TB",                   // fallback mostrato nel cerchio se manca il logo
+    iniziali: "AC",                   // fallback mostrato nel cerchio se manca il logo
   },
 
   /* ─── 2. COLORI BRAND (default nero / bianco / oro Food Media Lab) ───── */
@@ -47,54 +47,47 @@ const CONFIG = {
   /* ─── 3. HERO (headline + sottotitolo, unica sezione di testo) ───────── */
   hero: {
     // Usa <em> per evidenziare una parola in oro corsivo
-    headline:    "Scopri il gusto<br><em>della tradizione</em>",
-    sottotitolo: "Cucina italiana di qualità nel cuore della città — prenota il tuo tavolo e vivi un'esperienza indimenticabile.",
+    headline:    "Vivi l'esperienza della<br><em>vera cucina piemontese</em> a Torino",
+    sottotitolo: "Piatti autentici della tradizione, preparati come una volta: da Cirio ritrovi sapori che altrove non troverai più. Prenota il tuo tavolo e lasciati sorprendere.",
   },
 
   /* ─── 4. CONTATTI / FOOTER ──────────────────────────────────────────── */
   contatti: {
-    indirizzo: "Via Roma 12, 10123 Torino",
-    telefono:  "+39 011 000 0000",
-    email:     "info@trattoriadelborgo.it",
-    linkMappe: "https://maps.google.com/?q=Via+Roma+12+Torino",
+    indirizzo: "Corso Moncalieri 216/F, 10133 Torino",
+    telefono:  "011 276 4475",
+    email:     "",   // nessuna email per ora ("" = non mostrata nel footer)
+    linkMappe: "https://www.google.com/maps/search/?api=1&query=Corso+Moncalieri+216%2FF+10133+Torino",
     social: {
       instagram: "",   // metti l'URL per mostrare l'icona Instagram; "" = nascosta
       facebook:  "",   // metti l'URL per mostrare l'icona Facebook; "" = nascosta
     },
     // Orari mostrati nel footer (testo libero, aggiungi/rimuovi righe a piacere)
     orari: [
-      { giorno: "Martedì – Venerdì", orario: "19:00 – 23:30" },
-      { giorno: "Sabato – Domenica", orario: "12:30 – 15:00 · 19:00 – 23:30" },
-      { giorno: "Lunedì",            orario: "Chiuso" },
+      { giorno: "Lunedì – Domenica", orario: "12:30 – 14:30 · 19:30 – 22:30" },
     ],
   },
 
   /* ─── 5. PRENOTAZIONI — LOGICA DISPONIBILITÀ ★ CUORE DEL TEMPLATE ★ ──── */
   prenotazioni: {
-    capienzaCoperti: 50,   // ← coperti totali disponibili per OGNI fascia oraria
+    capienzaCoperti: 60,   // ← coperti totali disponibili per OGNI fascia oraria
 
-    // Fasce orarie selezionabili dall'utente
-    fasceOrarie: ["19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"],
+    // Fasce orarie selezionabili dall'utente (pranzo 12:30–14:30, cena 19:30–22:30, ogni 15 min)
+    fasceOrarie: [
+      "12:30","12:45","13:00","13:15","13:30","13:45","14:00","14:15","14:30",
+      "19:30","19:45","20:00","20:15","20:30","20:45","21:00","21:15","21:30","21:45","22:00","22:15","22:30"
+    ],
 
     // Giorni di chiusura settimanale (0=Domenica, 1=Lunedì … 6=Sabato)
-    giorniChiusura: [1],   // es. [1] = chiuso il lunedì; [] = sempre aperto
+    giorniChiusura: [],   // aperto tutti i giorni
 
-    maxPersonePrenotazione: 20,  // limite persone per singola prenotazione
+    maxPersonePrenotazione: 50,  // limite persone per singola prenotazione
     sogliaUltimiPosti:      8,   // sotto N coperti liberi mostra "Ultimi posti"
     giorniPrenotabili:      60,  // finestra prenotabile in giorni a partire da oggi
 
-    // COPERTI GIÀ OCCUPATI DI ESEMPIO (solo per la DEMO del template).
+    // COPERTI GIÀ OCCUPATI: vuoto in produzione (i conteggi arrivano dallo Sheet / localStorage).
     // Chiave = data "YYYY-MM-DD" → { "HH:MM": coperti_gia_prenotati }
-    // Servono a farti vedere subito il "grigetto" delle fasce piene funzionare.
-    // ⚠️ In produzione questi valori arrivano dallo Sheet / DB, non da qui.
-    occupatiDemo: {
-      // (le date vengono "riancorate" a partire da oggi all'avvio — vedi ancoraDemo)
-      "GIORNO+1": { "21:00": 50, "20:30": 47 },  // 21:00 pieno · 20:30 quasi pieno
-      "GIORNO+2": { "20:00": 50, "21:30": 45 },  // 20:00 pieno
-    },
-    // Se true, "GIORNO+N" nell'occupatiDemo viene convertito in date reali
-    // (oggi + N giorni) così la demo mostra sempre fasce piene nei prossimi giorni.
-    ancoraDemo: true,
+    occupatiDemo: {},
+    ancoraDemo: false,
   },
 
   /* ─── 6. INTEGRAZIONE GOOGLE SHEETS (una diversa per ogni ristorante) ── */
@@ -122,7 +115,7 @@ const CONFIG = {
     labelRichieste: "Richieste speciali",
     btnConferma:    "Conferma prenotazione",
     successTitolo:  "Prenotazione confermata!",
-    successMsg:     "Grazie per aver scelto di cenare con noi. Ti aspettiamo!",
+    successMsg:     "Grazie per aver scelto la nostra tavola. Ti aspettiamo!",
   },
 
   /* ─── 8. CONSENSO PRIVACY (checkbox obbligatoria prima di confermare) ─── */

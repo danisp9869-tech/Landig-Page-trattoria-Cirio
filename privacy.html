@@ -19,12 +19,12 @@
      ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 const DATI = {
-  ristorante:  "Trattoria del Borgo",          // nome del titolare / ristorante
-  indirizzo:   "Via Roma 12, 10123 Torino",    // sede
-  email:       "info@trattoriadelborgo.it",    // email di contatto per la privacy
-  telefono:    "+39 011 000 0000",             // telefono
-  conservazioneMesi: 24,                        // mesi di conservazione dei dati
-  aggiornamento: "luglio 2026",                 // data ultimo aggiornamento
+  ristorante:  "Antica Trattoria Cirio",           // nome del titolare / ristorante (⚠️ aggiornare con l'esatta ragione sociale quando disponibile)
+  indirizzo:   "Corso Moncalieri 216/F, 10133 Torino",  // sede
+  email:       "",                                  // ⚠️ email privacy da inserire appena disponibile ("" = usa il telefono)
+  telefono:    "011 276 4475",                      // telefono
+  conservazioneMesi: 24,                            // mesi di conservazione dei dati
+  aggiornamento: "luglio 2026",                     // data ultimo aggiornamento
 };
 </script>
 
@@ -111,7 +111,7 @@ a{color:var(--gold)}
     <div class="data-box">
       <p><strong id="tName"></strong></p>
       <p id="tAddr"></p>
-      <p>Email: <a id="tEmail"></a></p>
+      <p id="tEmailLine">Email: <a id="tEmail"></a></p>
       <p id="tPhone"></p>
     </div>
 
@@ -158,7 +158,7 @@ a{color:var(--gold)}
       <div class="right-item"><strong>Revoca consenso</strong>In ogni momento, senza pregiudicare la liceità del trattamento pregresso</div>
       <div class="right-item"><strong>Reclamo</strong>Al Garante Privacy</div>
     </div>
-    <p>Per esercitare i tuoi diritti puoi scrivere a <a id="tEmail2"></a>. Hai inoltre il diritto di proporre reclamo all'Autorità di controllo — il <strong>Garante per la protezione dei dati personali</strong> (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">www.garanteprivacy.it</a>).</p>
+    <p>Per esercitare i tuoi diritti puoi <span id="contattoDiritti"></span>. Hai inoltre il diritto di proporre reclamo all'Autorità di controllo — il <strong>Garante per la protezione dei dati personali</strong> (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">www.garanteprivacy.it</a>).</p>
 
     <h2><span class="num">10.</span>Modifiche a questa informativa</h2>
     <p>La presente informativa può essere aggiornata nel tempo. Ti invitiamo a consultarla periodicamente; la versione vigente è quella pubblicata su questa pagina.</p>
@@ -184,9 +184,20 @@ a{color:var(--gold)}
   document.getElementById('tName').textContent = DATI.ristorante;
   document.getElementById('tAddr').textContent = DATI.indirizzo;
   document.getElementById('tPhone').textContent = 'Tel: ' + DATI.telefono;
-  const em1 = document.getElementById('tEmail');
-  const em2 = document.getElementById('tEmail2');
-  [em1, em2].forEach(function(a){ a.textContent = DATI.email; a.href = 'mailto:' + DATI.email; });
+
+  // Gestione contatti: se l'email non è ancora disponibile, si usa il telefono.
+  const telLink = '<a href="tel:' + DATI.telefono.replace(/\s/g,'') + '">' + DATI.telefono + '</a>';
+  if(DATI.email){
+    const em1 = document.getElementById('tEmail');
+    em1.textContent = DATI.email; em1.href = 'mailto:' + DATI.email;
+    document.getElementById('contattoDiritti').innerHTML =
+      'scrivere a <a href="mailto:' + DATI.email + '">' + DATI.email + '</a> o contattare il Titolare al numero ' + telLink;
+  } else {
+    // Nessuna email: nascondo la riga email e rimando al telefono
+    document.getElementById('tEmailLine').style.display = 'none';
+    document.getElementById('contattoDiritti').innerHTML =
+      'contattare il Titolare ai recapiti sopra indicati, al numero ' + telLink;
+  }
   document.getElementById('tKeep').textContent = keepTxt;
 })();
 </script>
