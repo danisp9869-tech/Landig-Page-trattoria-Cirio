@@ -128,7 +128,24 @@ const CONFIG = {
     linkTesto: "informativa sulla privacy",   // parola da trasformare in link ("" per nessun link)
     linkUrl:   "privacy.html",                 // URL dell'informativa completa (pagina inclusa nel template)
   },
+
+  /* ─── 9. TRACKING (Meta Pixel) ──────────────────────────────────────── */
+  tracking: {
+    metaPixelId:       "1011565005220041",  // ID del Meta Pixel; "" = tracciamento disattivato
+    eventoConversione: "Lead",              // evento standard inviato a prenotazione confermata (es. "Lead" o "Schedule")
+  },
 };
+</script>
+
+<!-- ═══ Meta Pixel (caricato solo se CONFIG.tracking.metaPixelId è impostato) ═══ -->
+<script>
+(function(){
+  var t = (typeof CONFIG !== 'undefined' && CONFIG.tracking) || {};
+  if(!t.metaPixelId) return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', t.metaPixelId);
+  fbq('track', 'PageView');
+})();
 </script>
 
 <style>
@@ -733,7 +750,13 @@ h1 em{font-style:italic;color:var(--gold)}
     calYear: new Date().getFullYear(),
     calMonth: new Date().getMonth(),
     sending: false,
+    fbCheckout: false,   // per non inviare InitiateCheckout più volte
   };
+
+  // Invia un evento al Meta Pixel (se attivo). Isolato così è facile da estendere.
+  function trackFB(evento, parametri){
+    try { if(window.fbq) fbq('track', evento, parametri || {}); } catch(e){}
+  }
 
   /* ─────────────────────────────────────────────────────────────────────
      UTILITY DATE
@@ -1162,6 +1185,11 @@ h1 em{font-style:italic;color:var(--gold)}
     wizard.classList.toggle('summary-mode', n === 4);
     updateTabs();
     validateForm();
+    // Funnel: l'utente ha scelto data/persone/ora ed è arrivato ai contatti
+    if(n === 4 && !state.fbCheckout){
+      state.fbCheckout = true;
+      trackFB('InitiateCheckout', { content_name: C.brand.nome });
+    }
   }
 
   /* ── Validazione form contatti ── */
@@ -1235,12 +1263,18 @@ h1 em{font-style:italic;color:var(--gold)}
       '<p><strong>📞 Telefono:</strong> ' + esc(b.telefono) + '</p>' +
       '<p><strong>✉️ Email:</strong> ' + esc(b.email) + '</p>' +
       (b.richieste ? '<p><strong>📝 Richieste:</strong> ' + esc(b.richieste) + '</p>' : '');
+    // 🎯 CONVERSIONE: prenotazione confermata → evento al Meta Pixel
+    trackFB((C.tracking && C.tracking.eventoConversione) || 'Lead', {
+      content_name: C.brand.nome,
+      num_people: b.persone
+    });
     goToStep(5);
   }
 
   /* ── Reset ── */
   function resetBooking(){
     state.step=1; state.date=null; state.people=null; state.time=null; state.sending=false;
+    state.fbCheckout=false;
     state.calYear=new Date().getFullYear(); state.calMonth=new Date().getMonth();
     els.inputNome.value=''; els.inputTelefono.value=''; els.inputEmail.value='';
     els.inputRichieste.value=''; els.peopleCustom.value='';
