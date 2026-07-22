@@ -23,6 +23,9 @@
    Tutto il resto della pagina legge da qui: non toccare il codice sotto.   */
 const CONFIG = {
 
+  /* ─── 0. PROVENIENZA (per A/B test tra le due landing) ──────────────── */
+  origine: "Landing B",
+
   /* ─── 1. BRAND / IDENTITÀ ───────────────────────────────────────────── */
   brand: {
     nome:     "Antica Trattoria Cirio",  // nome del ristorante
@@ -1242,6 +1245,8 @@ h1 em{font-style:italic;color:var(--gold)}
       email:      els.inputEmail.value.trim(),
       richieste:  els.inputRichieste.value.trim(),
       privacy:    els.inputPrivacy.checked ? 'Sì' : 'No',   // consenso registrato
+      origine:    (C.origine || ''),
+      sorgente:   (typeof location !== 'undefined' ? location.hostname : ''),
       creata:     new Date().toISOString(),
     };
 
