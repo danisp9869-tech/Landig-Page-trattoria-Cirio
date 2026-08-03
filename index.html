@@ -71,7 +71,8 @@ const CONFIG = {
     },
     // Orari mostrati nel footer (testo libero, aggiungi/rimuovi righe a piacere)
     orari: [
-      { giorno: "Lunedì – Domenica", orario: "12:30 – 14:30 · 19:30 – 22:30" },
+      { giorno: "Lunedì – Venerdì",   orario: "19:30 – 22:30" },
+      { giorno: "Sabato e Domenica",  orario: "12:30 – 14:30 · 19:30 – 22:30" },
     ],
   },
 
@@ -87,6 +88,17 @@ const CONFIG = {
 
     // Giorni di chiusura settimanale (0=Domenica, 1=Lunedì … 6=Sabato)
     giorniChiusura: [],   // aperto tutti i giorni
+
+    /* Pranzo a servizio ridotto in certi mesi: il locale resta aperto 7 giorni
+       su 7, ma a pranzo solo nel fine settimana. La cena non è mai toccata.
+       Ad agosto 2026: pranzo solo sabato e domenica. Per togliere la regola
+       basta attivo:false (o svuotare `mesi` a settembre). */
+    pranzoRidotto: {
+      attivo: true,
+      mesi:   [7],        // 0=gennaio … 7=agosto
+      giorni: [6, 0],     // giorni in cui il pranzo RESTA attivo (6=sab, 0=dom)
+      fasce:  ["12:30","12:45","13:00","13:15","13:30","13:45","14:00","14:15","14:30"],
+    },
 
     maxPersonePrenotazione: 50,  // limite persone per singola prenotazione
     sogliaUltimiPosti:      8,   // sotto N coperti liberi mostra "Ultimi posti"
@@ -1153,6 +1165,16 @@ h1 em{font-style:italic;color:var(--gold)}
     setTimeout(function(){ goToStep(3); }, 180);
   }
 
+  /* Pranzo non servito in questa data? Vale solo nei mesi indicati in
+     CONFIG.prenotazioni.pranzoRidotto e solo sulle fasce di pranzo. */
+  function isPranzoChiuso(date, slot){
+    const r = P.pranzoRidotto;
+    if(!r || !r.attivo || !date) return false;
+    if(r.mesi.indexOf(date.getMonth()) === -1) return false;
+    if(r.fasce.indexOf(slot) === -1) return false;
+    return r.giorni.indexOf(date.getDay()) === -1;
+  }
+
   /* ── Orario (con logica capienza) ── */
   function renderTimeGrid(){
     els.timeGrid.innerHTML = '';
@@ -1160,6 +1182,8 @@ h1 em{font-style:italic;color:var(--gold)}
     const persone = state.people || 1;
 
     P.fasceOrarie.forEach(function(slot){
+      // Fasce di pranzo non servite: fuori dalla griglia, non disabilitate
+      if(isPranzoChiuso(state.date, slot)) return;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.setAttribute('role', 'option');
@@ -1294,6 +1318,10 @@ h1 em{font-style:italic;color:var(--gold)}
     if(els.btnConferma.disabled || state.sending) return;
 
     const dataKey = keyData(state.date);
+    if(isPranzoChiuso(state.date, state.time)){
+      alert('A pranzo siamo aperti solo sabato e domenica. Scegli un altro orario.');
+      goToStep(3); renderTimeGrid(); return;
+    }
     // Doppio controllo capienza al momento dell'invio (anti-race lato demo)
     if(!isFasciaDisponibile(dataKey, state.time, state.people)){
       alert('Spiacenti, questa fascia oraria si è appena riempita. Scegli un altro orario.');
