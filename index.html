@@ -159,6 +159,7 @@ const CONFIG = {
   tracking: {
     metaPixelId:       "1011565005220041",  // ID del Meta Pixel; "" = tracciamento disattivato
     eventoConversione: "Lead",              // evento standard inviato a prenotazione confermata (es. "Lead" o "Schedule")
+
   },
 };
 </script>
@@ -173,6 +174,8 @@ const CONFIG = {
   fbq('track', 'PageView');
 })();
 </script>
+<noscript><img height="1" width="1" style="display:none" alt=""
+  src="https://www.facebook.com/tr?id=1011565005220041&ev=PageView&noscript=1"></noscript>
 
 <style>
 :root{
@@ -801,9 +804,28 @@ h1 em{font-style:italic;color:var(--gold)}
   };
 
   // Invia un evento al Meta Pixel (se attivo). Isolato così è facile da estendere.
+  // L'eventID rende l'evento deduplicabile: se un domani si aggiunge l'invio
+  // lato server (Conversions API), Meta riconosce che è lo stesso evento e non
+  // lo conta due volte.
   function trackFB(evento, parametri){
-    try { if(window.fbq) fbq('track', evento, parametri || {}); } catch(e){}
+    try {
+      if(!window.fbq) return;
+      fbq('track', evento, parametri || {}, { eventID: nuovoEventId(evento) });
+    } catch(e){}
   }
+  function nuovoEventId(evento){
+    return evento + '.' + Date.now() + '.' + Math.random().toString(36).slice(2, 10);
+  }
+
+  /* ── Corrispondenza avanzata: NON farla da qui ──────────────────────────
+     Tentata e scartata dopo prova sul campo (05/08/2026): chiamare una
+     seconda volta fbq('init', id, {em, ph, …}) per passare i dati del
+     cliente ammutolisce il pixel — da quel momento non parte più nessun
+     evento, Lead compreso. Verificato anche su pagina appena caricata.
+     Anche fbq('set','userData', …) viene accettato ma non aggiunge nulla:
+     nell'URL dell'evento non compare alcun campo ud[].
+     I dati di contatto vanno quindi inviati lato server con la Conversions
+     API, riusando l'eventID qui sotto per non contare due volte l'evento. */
 
   /* ─────────────────────────────────────────────────────────────────────
      UTILITY DATE
