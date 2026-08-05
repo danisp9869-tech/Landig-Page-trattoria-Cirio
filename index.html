@@ -159,7 +159,6 @@ const CONFIG = {
   tracking: {
     metaPixelId:       "1011565005220041",  // ID del Meta Pixel; "" = tracciamento disattivato
     eventoConversione: "Lead",              // evento standard inviato a prenotazione confermata (es. "Lead" o "Schedule")
-
   },
 };
 </script>
@@ -174,8 +173,6 @@ const CONFIG = {
   fbq('track', 'PageView');
 })();
 </script>
-<noscript><img height="1" width="1" style="display:none" alt=""
-  src="https://www.facebook.com/tr?id=1011565005220041&ev=PageView&noscript=1"></noscript>
 
 <style>
 :root{
@@ -804,48 +801,9 @@ h1 em{font-style:italic;color:var(--gold)}
   };
 
   // Invia un evento al Meta Pixel (se attivo). Isolato così è facile da estendere.
-  // L'eventID rende l'evento deduplicabile: se un domani si aggiunge l'invio
-  // lato server (Conversions API), Meta riconosce che è lo stesso evento e non
-  // lo conta due volte.
-  function trackFB(evento, parametri, eventIdEsplicito){
-    try {
-      if(!window.fbq) return;
-      fbq('track', evento, parametri || {}, { eventID: eventIdEsplicito || nuovoEventId(evento) });
-    } catch(e){}
+  function trackFB(evento, parametri){
+    try { if(window.fbq) fbq('track', evento, parametri || {}); } catch(e){}
   }
-  function nuovoEventId(evento){
-    return evento + '.' + Date.now() + '.' + Math.random().toString(36).slice(2, 10);
-  }
-
-  /* ── Identificativi Meta del browser ────────────────────────────────────
-     _fbp  = identificativo che il pixel assegna al browser
-     fbclid = parametro che Meta aggiunge al link quando si arriva da un'ad;
-              va trasformato in _fbc nel formato "fb.1.<timestamp>.<fbclid>".
-     Non sono dati personali del cliente, ma sono ciò che permette a Meta di
-     ricollegare la conversione all'inserzione: vanno passati alla Conversions
-     API insieme all'evento, altrimenti il match resta debole.              */
-  function leggiCookie(nome){
-    var m = document.cookie.match('(^|;)\\s*' + nome + '\\s*=\\s*([^;]+)');
-    return m ? m[2] : '';
-  }
-  function identificativiMeta(){
-    var fbc = leggiCookie('_fbc');
-    if(!fbc){
-      var fbclid = (location.search.match(/[?&]fbclid=([^&]+)/) || [])[1];
-      if(fbclid) fbc = 'fb.1.' + Date.now() + '.' + decodeURIComponent(fbclid);
-    }
-    return { fbp: leggiCookie('_fbp'), fbc: fbc };
-  }
-
-  /* ── Corrispondenza avanzata: NON farla da qui ──────────────────────────
-     Tentata e scartata dopo prova sul campo (05/08/2026): chiamare una
-     seconda volta fbq('init', id, {em, ph, …}) per passare i dati del
-     cliente ammutolisce il pixel — da quel momento non parte più nessun
-     evento, Lead compreso. Verificato anche su pagina appena caricata.
-     Anche fbq('set','userData', …) viene accettato ma non aggiunge nulla:
-     nell'URL dell'evento non compare alcun campo ud[].
-     I dati di contatto vanno quindi inviati lato server con la Conversions
-     API, riusando l'eventID qui sotto per non contare due volte l'evento. */
 
   /* ─────────────────────────────────────────────────────────────────────
      UTILITY DATE
@@ -1370,11 +1328,6 @@ h1 em{font-style:italic;color:var(--gold)}
       goToStep(3); renderTimeGrid(); return;
     }
 
-    // Identificativo unico della conversione: lo usano sia il pixel nel browser
-    // sia l'invio lato server, così Meta riconosce che è lo stesso evento.
-    const idConversione = nuovoEventId((C.tracking && C.tracking.eventoConversione) || 'Lead');
-    const idMeta = identificativiMeta();
-
     const prenotazione = {
       ristorante: C.brand.nome,
       data:       dataKey,                 // "YYYY-MM-DD"
@@ -1390,19 +1343,6 @@ h1 em{font-style:italic;color:var(--gold)}
       origine:    (C.origine || ''),
       sorgente:   (typeof location !== 'undefined' ? location.hostname : ''),
       creata:     adessoRoma(),          // ora italiana, non UTC
-
-      /* ── Campi per la Conversions API (invio lato server da Apps Script) ──
-         eventId  è lo STESSO identificativo usato dal pixel nel browser:
-                  serve a Meta per capire che l'evento del browser e quello
-                  del server sono lo stesso, e non contarlo due volte.
-         fbp/fbc  identificativi del browser e del click sull'inserzione.
-         urlPagina serve a Meta come event_source_url.                      */
-      eventId:    idConversione,
-      eventName:  (C.tracking && C.tracking.eventoConversione) || 'Lead',
-      fbp:        idMeta.fbp,
-      fbc:        idMeta.fbc,
-      urlPagina:  location.href,
-      userAgent:  navigator.userAgent,
     };
 
     state.sending = true;
@@ -1423,13 +1363,11 @@ h1 em{font-style:italic;color:var(--gold)}
       '<p><strong>📞 Telefono:</strong> ' + esc(b.telefono) + '</p>' +
       '<p><strong>✉️ Email:</strong> ' + esc(b.email) + '</p>' +
       (b.richieste ? '<p><strong>📝 Richieste:</strong> ' + esc(b.richieste) + '</p>' : '');
-    // 🎯 CONVERSIONE: prenotazione confermata → evento al Meta Pixel.
-    // Usa lo stesso eventId finito nel payload inviato allo Sheet, così
-    // l'evento del browser e quello lato server si deduplicano.
+    // 🎯 CONVERSIONE: prenotazione confermata → evento al Meta Pixel
     trackFB((C.tracking && C.tracking.eventoConversione) || 'Lead', {
       content_name: C.brand.nome,
       num_people: b.persone
-    }, b.eventId);
+    });
     goToStep(5);
   }
 
