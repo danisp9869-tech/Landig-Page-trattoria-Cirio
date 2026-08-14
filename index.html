@@ -144,8 +144,9 @@ const CONFIG = {
     labelEmail:     "Email",
     labelRichieste: "Richieste speciali",
     btnConferma:    "Conferma prenotazione",
-    successTitolo:  "Prenotazione confermata!",
-    successMsg:     "Grazie per aver scelto la nostra tavola. Ti aspettiamo!",
+    successRiepilogo: "Riepilogo della tua richiesta",
+    successTitolo:  "Abbiamo ricevuto la tua richiesta di prenotazione",
+    successMsg:     "Il nostro staff ti ricontatterà per la conferma. Grazie per aver scelto Antica Trattoria Cirio!",
   },
 
   /* ─── 8. CONSENSO PRIVACY (checkbox obbligatoria prima di confermare) ─── */
@@ -495,6 +496,7 @@ h1 em{font-style:italic;color:var(--gold)}
 .success-screen h3{font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:10px;color:var(--ink)}
 .success-screen p{font-size:14px;color:var(--ink-light);line-height:1.65;margin-bottom:6px}
 .success-details{margin-top:20px;padding:16px 18px;background:var(--gray-100);border-radius:var(--radius-sm);text-align:left;border:1px solid var(--gray-200)}
+.success-details-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400);margin-bottom:10px}
 .success-details p{font-size:13px;color:var(--ink);margin-bottom:6px;line-height:1.5}
 .success-details p:last-child{margin-bottom:0}
 .btn-new-booking{
@@ -1405,6 +1407,7 @@ h1 em{font-style:italic;color:var(--gold)}
   }
   function mostraSuccesso(b){
     els.successDetails.innerHTML =
+      '<div class="success-details-title">' + esc(C.testi.successRiepilogo || '') + '</div>' +
       '<p><strong>📅 Data:</strong> ' + esc(b.dataLabel) + '</p>' +
       '<p><strong>👥 Persone:</strong> ' + esc(String(b.persone)) + '</p>' +
       '<p><strong>🕐 Orario:</strong> ' + esc(b.ora) + '</p>' +
